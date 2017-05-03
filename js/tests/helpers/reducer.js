@@ -1,9 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const initialState = {
+exports.initialState = {
     cats: [],
+    dogs: [],
 };
-function reducer(prevState = initialState, action) {
+function catsReducer(prevState = exports.initialState, action) {
     const nextState = Object.assign({}, prevState);
     switch (action.type) {
         case 'ADD_CAT': {
@@ -15,4 +16,17 @@ function reducer(prevState = initialState, action) {
         }
     }
 }
-exports.default = reducer;
+exports.catsReducer = catsReducer;
+function dogsReducer(prevState = exports.initialState, action) {
+    const nextState = Object.assign({}, prevState);
+    switch (action.type) {
+        case 'ADD_DOG': {
+            nextState.dogs = nextState.dogs.concat(action.dog);
+            return nextState;
+        }
+        default: {
+            return prevState;
+        }
+    }
+}
+exports.dogsReducer = dogsReducer;

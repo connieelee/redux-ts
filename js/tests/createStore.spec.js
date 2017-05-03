@@ -6,10 +6,11 @@ const createStore_1 = require("../createStore");
 const reducer_1 = require("./helpers/reducer");
 describe('createStore', () => {
     let store, reducerSpy;
-    const addCatAction = { type: 'ADD_CAT', cat: { name: 'Marcy' } };
+    const marcy = { name: 'Marcy' }, addCatAction = { type: 'ADD_CAT', cat: marcy };
+    const murphy = { name: 'Murphy' }, addDogAction = { type: 'ADD_DOG', dog: murphy };
     const unknownAction = { type: 'UNKNOWN' };
     beforeEach(() => {
-        reducerSpy = sinon_1.spy(reducer_1.default);
+        reducerSpy = sinon_1.spy(reducer_1.catsReducer);
         store = createStore_1.default(reducerSpy);
     });
     it('exposes public APIs', () => {
@@ -21,18 +22,35 @@ describe('createStore', () => {
     });
     it('expects reducer to be a function', () => {
         chai_1.expect(createStore_1.default.bind(null, 'not a func')).to.throw(Error);
+        chai_1.expect(store.replaceReducer.bind(null, 'not a func')).to.throw(Error);
     });
     it('initiates state by running the reducer', () => {
         chai_1.expect(reducerSpy.called).to.be.true;
-        chai_1.expect(store.getState()).to.deep.equal({ cats: [] });
+        chai_1.expect(store.getState()).to.deep.equal(reducer_1.initialState);
     });
-    it('preserves previous state when replacing reducer');
-    it('dispatch calls reducer with action object', () => {
-        const timesCalled = reducerSpy.callCount;
-        const prevState = store.getState();
-        store.dispatch(addCatAction);
-        chai_1.expect(reducerSpy.callCount).to.equal(timesCalled + 1);
-        chai_1.expect(reducerSpy.lastCall.args).to.deep.equal([prevState, addCatAction]);
+    it('preserves previous state when replacing reducer', () => {
+        const originalState = store.getState();
+        const dogsReducerSpy = sinon_1.spy(reducer_1.dogsReducer);
+        store.replaceReducer(dogsReducerSpy);
+        chai_1.expect(dogsReducerSpy.called).to.be.false;
+        chai_1.expect(store.getState()).to.deep.equal(originalState);
+        store.dispatch(addDogAction);
+        chai_1.expect(dogsReducerSpy.calledOnce).to.be.true;
+    });
+    describe('dispatch', () => {
+        it('calls reducer with action object', () => {
+            const timesCalled = reducerSpy.callCount;
+            const prevState = store.getState();
+            store.dispatch(addCatAction);
+            chai_1.expect(reducerSpy.callCount).to.equal(timesCalled + 1);
+            chai_1.expect(reducerSpy.lastCall.args).to.deep.equal([prevState, addCatAction]);
+        });
+        it('updates state if what reducer returns !== current state', () => {
+            const expectedState = Object.assign({}, store.getState());
+            expectedState.cats = expectedState.cats.concat(marcy);
+            store.dispatch(addCatAction);
+            chai_1.expect(store.getState()).to.deep.equal(expectedState);
+        });
     });
     describe('subscribe', () => {
         it('throws error if argument is not a function', () => {

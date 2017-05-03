@@ -11,6 +11,7 @@ function createStore(reducer) {
     function dispatch(action) {
         const nextState = reducer(currentState, action);
         if (nextState !== currentState) {
+            currentState = nextState;
             subscriptions.forEach(sub => sub());
         }
     }
@@ -22,7 +23,10 @@ function createStore(reducer) {
             subscriptions = subscriptions.filter(sub => sub !== subscription);
         };
     }
-    function replaceReducer(reducer) {
+    function replaceReducer(nextReducer) {
+        if (typeof nextReducer !== 'function')
+            throw new Error('replaceReducer expects a function');
+        reducer = nextReducer;
     }
     return {
         getState,

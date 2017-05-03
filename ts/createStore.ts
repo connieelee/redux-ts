@@ -13,8 +13,10 @@ function createStore(reducer: Reducer): Store {
   function dispatch(action: Action) {
       const nextState = reducer(currentState, action);
       if (nextState !== currentState) {
+        currentState = nextState;
         subscriptions.forEach(sub => sub());
       }
+
   }
 
   function subscribe(subscription: ()=>void) {
@@ -25,8 +27,9 @@ function createStore(reducer: Reducer): Store {
     }
   }
 
-  function replaceReducer(reducer: Reducer) {
-    
+  function replaceReducer(nextReducer: Reducer) {
+    if (typeof nextReducer !== 'function') throw new Error('replaceReducer expects a function');
+    reducer = nextReducer;
   }
 
   return {
