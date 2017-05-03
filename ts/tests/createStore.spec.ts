@@ -3,23 +3,24 @@ import { spy } from 'sinon';
 
 import createStore from '../createStore';
 import reducer from './helpers/reducer';
+import { Store, Action } from '../types';
 
 describe('createStore', () => {
-  let store, reducerSpy: spy;
-  const addCatAction = { type: 'ADD_CAT', cat: { name: 'Marcy' } };
-  const unknownAction = { type: 'UNKNOWN' };
+  let store: Store, reducerSpy: sinon.SinonSpy;
+  const addCatAction: Action = { type: 'ADD_CAT', cat: { name: 'Marcy' } };
+  const unknownAction: Action = { type: 'UNKNOWN' };
 
   beforeEach(() => {
-    reducerSpy = spy(reducer)
+    reducerSpy = spy(reducer);
     store = createStore(reducerSpy);
   });
 
     it('exposes public APIs', () => {
       expect(Object.keys(store)).to.have.lengthOf(4);
-      expect(store.getState).to.be.a.function;
-      expect(store.dispatch).to.be.a.function;
-      expect(store.subscribe).to.be.a.function;
-      expect(store.replaceReducer).to.be.a.function;
+      expect(store.getState).to.be.a('function');
+      expect(store.dispatch).to.be.a('function');
+      expect(store.subscribe).to.be.a('function');
+      expect(store.replaceReducer).to.be.a('function');
     });
     
     it('expects reducer to be a function', () => {
@@ -30,6 +31,8 @@ describe('createStore', () => {
       expect(reducerSpy.called).to.be.true;
       expect(store.getState()).to.deep.equal({ cats: [] });
     });
+
+    it('preserves previous state when replacing reducer');
 
     it('dispatch calls reducer with action object', () => {
       const timesCalled = reducerSpy.callCount;

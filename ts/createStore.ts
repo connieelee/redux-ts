@@ -1,14 +1,16 @@
-function createStore(reducer: (prevState: object, action:object)=>object, initialState?: object) {
+import { Action, Store, Reducer } from './types';
+
+function createStore(reducer: Reducer): Store {
   if (typeof reducer !== 'function') throw new Error('Reducer must be a function');
 
-  let currentState: object = Object.assign({}, initialState, reducer(undefined, {}));
+  let currentState: any = reducer(undefined, { type: 'INIT' });
   let subscriptions: (()=>void)[] = [];
 
   function getState() {
     return currentState;
   }
 
-  function dispatch(action: object) {
+  function dispatch(action: Action) {
       const nextState = reducer(currentState, action);
       if (nextState !== currentState) {
         subscriptions.forEach(sub => sub());
@@ -23,8 +25,8 @@ function createStore(reducer: (prevState: object, action:object)=>object, initia
     }
   }
 
-  function replaceReducer() {
-
+  function replaceReducer(reducer: Reducer) {
+    
   }
 
   return {
@@ -32,7 +34,7 @@ function createStore(reducer: (prevState: object, action:object)=>object, initia
     subscribe,
     dispatch,
     replaceReducer,
-  }
+  };
 }
 
 export default createStore;

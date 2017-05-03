@@ -1,8 +1,10 @@
+import { Action } from '../../types';
+
 const initialState = {
   cats: [],
 };
 
-export default function reducer(prevState=initialState, action: object) {
+export default function reducer(prevState=initialState, action: Action) {
   const nextState = Object.assign({}, prevState);
 
   switch (action.type) {
