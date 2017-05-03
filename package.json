@@ -4,17 +4,20 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha ./js/tests/*.spec.js",
-    "build": "tsc -w"
+    "test": "mocha ./js/tests/*.spec.js -w",
+    "clean": "rm -rf ./js && mkdir js",
+    "build": "npm run clean && tsc || echo done."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "typescript": "^2.3.2"
-  },
   "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.3.0",
     "tslint": "^5.1.0",
     "typescript": "^2.3.2"
+  },
+  "dependencies": {
+    "sinon": "^2.2.0"
   }
 }
