@@ -3,10 +3,10 @@ import { spy } from 'sinon';
 
 import createStore from '../createStore';
 import { initialState, catsReducer, dogsReducer } from './helpers/reducer';
-import { Store, Action } from '../types';
+import { Store , Action } from '../types';
 
 describe('createStore', () => {
-  let store: Store, reducerSpy: sinon.SinonSpy;
+  let store: Store<{[key: string]: any}>, catsReducerSpy: sinon.SinonSpy;
 
   const marcy = { name: 'Marcy' },
         addCatAction: Action = { type: 'ADD_CAT', cat: marcy };
@@ -17,8 +17,8 @@ describe('createStore', () => {
   const unknownAction: Action = { type: 'UNKNOWN' };
 
   beforeEach(() => {
-    reducerSpy = spy(catsReducer);
-    store = createStore(reducerSpy);
+    catsReducerSpy = spy(catsReducer);
+    store = createStore(catsReducerSpy);
   });
 
     it('exposes public APIs', () => {
@@ -30,35 +30,35 @@ describe('createStore', () => {
     });
     
     it('expects reducer to be a function', () => {
-      expect(createStore.bind(null, 'not a func')).to.throw(Error);
-      expect(store.replaceReducer.bind(null, 'not a func')).to.throw(Error);
+      expect(createStore.bind(null, 'not a func')).to.throw(TypeError);
+      expect(store.replaceReducer.bind(null, 'not a func')).to.throw(TypeError);
     });
 
     it('initiates state by running the reducer', () => {
-      expect(reducerSpy.called).to.be.true;
+      expect(catsReducerSpy.called).to.be.true;
       expect(store.getState()).to.deep.equal(initialState);
     });
 
     it('preserves previous state when replacing reducer', () => {
       const originalState = store.getState();
-      const dogsReducerSpy = spy(dogsReducer);
+      const catsReducerSpy = spy(dogsReducer);
 
-      store.replaceReducer(dogsReducerSpy);
-      expect(dogsReducerSpy.called).to.be.false;
+      store.replaceReducer(catsReducerSpy);
+      expect(catsReducerSpy.called).to.be.false;
       expect(store.getState()).to.deep.equal(originalState);
 
       store.dispatch(addDogAction);
-      expect(dogsReducerSpy.calledOnce).to.be.true;
+      expect(catsReducerSpy.calledOnce).to.be.true;
     });
 
     describe('dispatch', () => {
       it('calls reducer with action object', () => {
-        const timesCalled = reducerSpy.callCount;
+        const timesCalled = catsReducerSpy.callCount;
         const prevState = store.getState();
 
         store.dispatch(addCatAction);
-        expect(reducerSpy.callCount).to.equal(timesCalled + 1);
-        expect(reducerSpy.lastCall.args).to.deep.equal([prevState, addCatAction]);
+        expect(catsReducerSpy.callCount).to.equal(timesCalled + 1);
+        expect(catsReducerSpy.lastCall.args).to.deep.equal([prevState, addCatAction]);
       });
 
       it('updates state if what reducer returns !== current state', () => {
@@ -71,8 +71,8 @@ describe('createStore', () => {
     });
 
     describe('subscribe', () => {
-      it('throws error if argument is not a function', () => {
-        expect(store.subscribe.bind(null, 'not a func')).to.throw(Error);
+      it('throws TypeError if argument is not a function', () => {
+        expect(store.subscribe.bind(null, 'not a func')).to.throw(TypeError);
       });
 
       it('runs all active subscriptions only when state changes', () => {
@@ -98,7 +98,7 @@ describe('createStore', () => {
         unsubscribeSpy1();
 
         store.dispatch(addCatAction);
-        expect(spy1.calledTwice).to.be.false;
+        expect(spy1.calledOnce).to.be.true;
         expect(spy2.calledTwice).to.be.true;
       });
     });

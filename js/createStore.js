@@ -1,9 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function createStore(reducer) {
-    if (typeof reducer !== 'function')
-        throw new Error('Reducer must be a function');
-    let currentState = reducer(undefined, { type: 'INIT' });
+function createStore(reducer, preloadedState, enhancer) {
+    if (typeof reducer !== 'function') {
+        throw new TypeError('Expected enhancer to be a function.');
+    }
+    if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
+        enhancer = preloadedState;
+        preloadedState = undefined;
+    }
+    if (typeof enhancer !== 'undefined') {
+        if (typeof enhancer !== 'function') {
+            throw new TypeError('Expected enhancer to be a function.');
+        }
+        const enhancedCreateStore = enhancer(createStore);
+        return enhancedCreateStore(reducer, preloadedState);
+    }
+    let currentState = reducer(preloadedState, { type: 'INIT' });
     let subscriptions = [];
     function getState() {
         return currentState;
@@ -16,16 +28,19 @@ function createStore(reducer) {
         }
     }
     function subscribe(subscription) {
-        if (typeof subscription !== 'function')
-            throw new Error('subscribe expects a function');
+        if (typeof subscription !== 'function') {
+            throw new TypeError('subscribe expects a function');
+        }
         subscriptions.push(subscription);
         return () => {
-            subscriptions = subscriptions.filter(sub => sub !== subscription);
+            const index = subscriptions.indexOf(subscription);
+            subscriptions.splice(index, 1);
         };
     }
     function replaceReducer(nextReducer) {
-        if (typeof nextReducer !== 'function')
-            throw new Error('replaceReducer expects a function');
+        if (typeof nextReducer !== 'function') {
+            throw new TypeError('replaceReducer expects a function');
+        }
         reducer = nextReducer;
     }
     return {
