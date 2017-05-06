@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 function createStore(reducer, preloadedState, enhancer) {
     if (typeof reducer !== 'function') {
-        throw new TypeError('Expected enhancer to be a function.');
+        throw new TypeError('Expected reducer to be a function.');
     }
     if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
         enhancer = preloadedState;

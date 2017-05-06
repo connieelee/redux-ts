@@ -28,27 +28,31 @@ describe('createStore', () => {
       expect(store.subscribe).to.be.a('function');
       expect(store.replaceReducer).to.be.a('function');
     });
-    
-    it('expects reducer to be a function', () => {
-      expect(createStore.bind(null, 'not a func')).to.throw(TypeError);
-      expect(store.replaceReducer.bind(null, 'not a func')).to.throw(TypeError);
-    });
 
-    it('initiates state by running the reducer', () => {
-      expect(catsReducerSpy.called).to.be.true;
-      expect(store.getState()).to.deep.equal(initialState);
-    });
+    describe('reducer', () => {
+      it('expects reducer to be a function', () => {
+        expect(createStore.bind(null, 'not a func'))
+          .to.throw(TypeError, 'Expected reducer to be a function');
+        expect(store.replaceReducer.bind(null, 'not a func'))
+          .to.throw(TypeError, 'expects a function');
+      });
 
-    it('preserves previous state when replacing reducer', () => {
-      const originalState = store.getState();
-      const catsReducerSpy = spy(dogsReducer);
+      it('initiates state by running the reducer', () => {
+        expect(catsReducerSpy.called).to.be.true;
+        expect(store.getState()).to.deep.equal(initialState);
+      });
 
-      store.replaceReducer(catsReducerSpy);
-      expect(catsReducerSpy.called).to.be.false;
-      expect(store.getState()).to.deep.equal(originalState);
+      it('preserves previous state when replacing reducer', () => {
+        const originalState = store.getState();
+        const catsReducerSpy = spy(dogsReducer);
 
-      store.dispatch(addDogAction);
-      expect(catsReducerSpy.calledOnce).to.be.true;
+        store.replaceReducer(catsReducerSpy);
+        expect(catsReducerSpy.called).to.be.false;
+        expect(store.getState()).to.deep.equal(originalState);
+
+        store.dispatch(addDogAction);
+        expect(catsReducerSpy.calledOnce).to.be.true;
+      });
     });
 
     describe('dispatch', () => {
@@ -72,7 +76,8 @@ describe('createStore', () => {
 
     describe('subscribe', () => {
       it('throws TypeError if argument is not a function', () => {
-        expect(store.subscribe.bind(null, 'not a func')).to.throw(TypeError);
+        expect(store.subscribe.bind(null, 'not a func'))
+          .to.throw(TypeError, 'subscribe expects a function');
       });
 
       it('runs all active subscriptions only when state changes', () => {
@@ -100,6 +105,23 @@ describe('createStore', () => {
         store.dispatch(addCatAction);
         expect(spy1.calledOnce).to.be.true;
         expect(spy2.calledTwice).to.be.true;
+      });
+    });
+
+    describe('enhancer', () => {
+      const enhancer = () => () => {};
+
+      it('is an optional argument', () => {
+        expect(createStore.bind(null, catsReducer)).to.not.throw();
+      });
+
+      it('expects the enhancer to be a function', () => {
+        expect(createStore.bind(null, catsReducer, { cats: [] }, 'not a func'))
+          .to.throw(TypeError, 'Expected enhancer to be a function');
+      });
+
+      it('is able to recognize enhancer function even without optional preloadedState provided', () => {
+        expect(createStore.bind(null, catsReducer, enhancer)).to.not.throw();
       });
     });
 });
